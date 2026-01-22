@@ -2,6 +2,9 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./config/swagger.js";
+
 
 import { notFound, errorHandler } from "./middleware/error.js";
 
@@ -41,6 +44,8 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 
 app.use(notFound);
 app.use(errorHandler);
