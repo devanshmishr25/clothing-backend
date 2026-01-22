@@ -1,0 +1,133 @@
+openapi: 3.0.0
+info:
+  title: Clothing Backend API
+  version: 1.0.0
+servers:
+  - url: https://clothingbackend-cotb.onrender.com
+  - url: http://localhost:5000
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: OK
+
+  /api/auth/register:
+    post:
+      summary: Register user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name: { type: string }
+                email: { type: string }
+                password: { type: string }
+      responses:
+        "201": { description: Created }
+
+  /api/auth/login:
+    post:
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        "200": { description: OK }
+
+  /api/categories:
+    get:
+      summary: List categories
+      responses:
+        "200": { description: OK }
+    post:
+      summary: Create category (admin)
+      responses:
+        "201": { description: Created }
+
+  /api/products:
+    get:
+      summary: List products (search/filter)
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+      responses:
+        "200": { description: OK }
+    post:
+      summary: Create product (admin)
+      responses:
+        "201": { description: Created }
+
+  /api/products/{slug}:
+    get:
+      summary: Get product by slug
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: OK }
+
+  /api/cart:
+    get:
+      summary: Get my cart (auth)
+      responses:
+        "200": { description: OK }
+    post:
+      summary: Add to cart (auth)
+      responses:
+        "201": { description: Created }
+    put:
+      summary: Update cart item qty (auth)
+      responses:
+        "200": { description: OK }
+
+  /api/orders:
+    post:
+      summary: Create order (auth)
+      responses:
+        "201": { description: Created }
+
+  /api/orders/me:
+    get:
+      summary: My orders (auth)
+      responses:
+        "200": { description: OK }
+
+  /api/orders/from-cart:
+    post:
+      summary: Create order from cart (auth)
+      responses:
+        "201": { description: Created }
+
+  /api/upload:
+    post:
+      summary: Upload single image (admin)
+      responses:
+        "201": { description: Created }
+
+  /api/upload/multiple:
+    post:
+      summary: Upload multiple images (admin)
+      responses:
+        "201": { description: Created }
+
+  /api/admin/users:
+    get:
+      summary: List users (admin)
+      responses:
+        "200": { description: OK }

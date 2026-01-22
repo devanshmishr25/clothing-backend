@@ -3,7 +3,8 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
-import { swaggerSpec } from "./config/swagger.js";
+import YAML from "yamljs";
+import path from "path";
 
 
 import { notFound, errorHandler } from "./middleware/error.js";
@@ -44,8 +45,8 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
+const swaggerDocument = YAML.load(path.join(process.cwd(), "src", "swagger.yaml"));
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(notFound);
 app.use(errorHandler);
