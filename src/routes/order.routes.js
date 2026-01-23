@@ -1,24 +1,22 @@
 import { Router } from "express";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import {
-  createOrder,
-  createOrderFromCart,
+  createCodOrderFromCart,
   myOrders,
+  getMyOrderById,
   allOrders,
   updateOrderStatus
 } from "../controllers/order.controller.js";
 
-
 const router = Router();
 
-// User
-router.post("/", requireAuth, createOrder);
-router.post("/from-cart", requireAuth, createOrderFromCart);
+// USER (COD)
+router.post("/cod/from-cart", requireAuth, createCodOrderFromCart);
 router.get("/me", requireAuth, myOrders);
+router.get("/me/:id", requireAuth, getMyOrderById);
 
-// Admin
+// ADMIN
 router.get("/", requireAuth, requireRole("admin"), allOrders);
 router.put("/:id/status", requireAuth, requireRole("admin"), updateOrderStatus);
-
 
 export default router;

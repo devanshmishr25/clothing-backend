@@ -17,12 +17,12 @@ const orderSchema = new mongoose.Schema(
     ],
 
     shippingAddress: {
-      fullName: String,
-      phone: String,
-      line1: String,
-      city: String,
-      state: String,
-      pincode: String
+      fullName: { type: String, required: true },
+      phone: { type: String, required: true },
+      line1: { type: String, required: true },
+      city: { type: String, required: true },
+      state: { type: String, required: true },
+      pincode: { type: String, required: true }
     },
 
     totals: {
@@ -33,9 +33,8 @@ const orderSchema = new mongoose.Schema(
     },
 
     payment: {
-      method: { type: String, enum: ["cod", "online"], default: "cod" },
-      status: { type: String, enum: ["pending", "paid", "failed"], default: "pending" },
-      transactionId: String
+      method: { type: String, enum: ["cod"], default: "cod" }, // COD only here
+      status: { type: String, enum: ["pending", "paid", "failed"], default: "pending" }
     },
 
     status: {

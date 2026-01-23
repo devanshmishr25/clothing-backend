@@ -3,143 +3,38 @@ import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import Cart from "../models/Cart.js";
 
-const createOrderSchema = z.object({
-  items: z
-    .array(
-      z.object({
-        product: z.string(),
-        qty: z.number().int().positive(),
-        size: z.string().optional(),
-        color: z.string().optional(),
-      }),
-    )
-    .min(1),
-  shippingAddress: z.object({
-    fullName: z.string().min(2),
-    phone: z.string().min(8),
-    line1: z.string().min(2),
-    city: z.string().min(2),
-    state: z.string().min(2),
-    pincode: z.string().min(4),
-  }),
-  paymentMethod: z.enum(["cod", "online"]).default("cod"),
+// ---------- VALIDATION ----------
+const shippingSchema = z.object({
+  fullName: z.string().min(2),
+  phone: z.string().min(8),
+  line1: z.string().min(2),
+  city: z.string().min(2),
+  state: z.string().min(2),
+  pincode: z.string().min(4)
 });
 
-export async function createOrder(req, res) {
-  const parsed = createOrderSchema.safeParse(req.body);
+const createFromCartSchema = z.object({
+  shippingAddress: shippingSchema
+});
+
+// ---------- USER: COD CHECKOUT FROM CART ----------
+export async function createCodOrderFromCart(req, res) {
+  const parsed = createFromCartSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res
-      .status(400)
-      .json({ message: "Invalid data", errors: parsed.error.errors });
+    return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
   }
 
-  const { items, shippingAddress, paymentMethod } = parsed.data;
+  const { shippingAddress } = parsed.data;
 
-  // Compute totals + snapshot items
-  let subtotal = 0;
-  const finalItems = [];
-
-  for (const i of items) {
-    const product = await Product.findById(i.product);
-    if (!product || !product.isActive) {
-      return res.status(400).json({ message: "Invalid product in cart" });
-    }
-    if (product.stock < i.qty) {
-      return res
-        .status(400)
-        .json({ message: `Out of stock: ${product.title}` });
-    }
-
-    subtotal += product.price * i.qty;
-
-    finalItems.push({
-      product: product._id,
-      title: product.title,
-      price: product.price,
-      qty: i.qty,
-      size: i.size || "",
-      color: i.color || "",
-      image: product.images?.[0]?.url || "",
-    });
-  }
-
-  // Example shipping rule
-  const shipping = subtotal >= 999 ? 0 : 49;
-  const discount = 0;
-  const grandTotal = subtotal + shipping - discount;
-
-  // Reduce stock
-  for (const i of items) {
-    await Product.findByIdAndUpdate(i.product, { $inc: { stock: -i.qty } });
-  }
-
-  const order = await Order.create({
-    user: req.user.id,
-    items: finalItems,
-    shippingAddress,
-    totals: { subtotal, shipping, discount, grandTotal },
-    payment: { method: paymentMethod, status: "pending" },
-    status: "pending",
-  });
-
-  res.status(201).json(order);
-}
-
-export async function myOrders(req, res) {
-  const orders = await Order.find({ user: req.user.id }).sort({
-    createdAt: -1,
-  });
-  res.json(orders);
-}
-
-// Admin
-export async function allOrders(req, res) {
-  const orders = await Order.find()
-    .populate("user", "name email")
-    .sort({ createdAt: -1 });
-  res.json(orders);
-}
-
-export async function updateOrderStatus(req, res) {
-  const { status } = req.body; // confirmed/shipped/delivered/cancelled
-  const allowed = ["pending", "confirmed", "shipped", "delivered", "cancelled"];
-  if (!allowed.includes(status))
-    return res.status(400).json({ message: "Invalid status" });
-
-  const order = await Order.findByIdAndUpdate(
-    req.params.id,
-    { status },
-    { new: true },
-  );
-  if (!order) return res.status(404).json({ message: "Order not found" });
-  res.json(order);
-}
-
-export async function createOrderFromCart(req, res) {
-  // get cart + product details
   const cart = await Cart.findOne({ user: req.user.id }).populate("items.product");
   if (!cart || cart.items.length === 0) {
     return res.status(400).json({ message: "Cart is empty" });
   }
 
-  const { shippingAddress, paymentMethod = "cod" } = req.body;
-
-  // basic validation (simple)
-  if (
-    !shippingAddress?.fullName ||
-    !shippingAddress?.phone ||
-    !shippingAddress?.line1 ||
-    !shippingAddress?.city ||
-    !shippingAddress?.state ||
-    !shippingAddress?.pincode
-  ) {
-    return res.status(400).json({ message: "Shipping address is required" });
-  }
-
+  // Build order items + check stock
   let subtotal = 0;
   const finalItems = [];
 
-  // build items + check stock
   for (const item of cart.items) {
     const product = item.product;
 
@@ -164,29 +59,92 @@ export async function createOrderFromCart(req, res) {
     });
   }
 
-  // shipping rule (you can change)
+  // Shipping rule (edit as you want)
   const shipping = subtotal >= 999 ? 0 : 49;
   const discount = 0;
   const grandTotal = subtotal + shipping - discount;
 
-  // reduce stock
+  // Reduce stock (simple approach)
   for (const item of cart.items) {
     await Product.findByIdAndUpdate(item.product._id, { $inc: { stock: -item.qty } });
   }
 
-  // create order
+  // Create COD order
   const order = await Order.create({
     user: req.user.id,
     items: finalItems,
     shippingAddress,
     totals: { subtotal, shipping, discount, grandTotal },
-    payment: { method: paymentMethod, status: "pending" },
+    payment: { method: "cod", status: "pending" },
     status: "pending"
   });
 
-  // clear cart
+  // Clear cart
   cart.items = [];
   await cart.save();
 
   res.status(201).json(order);
+}
+
+// ---------- USER ----------
+export async function myOrders(req, res) {
+  const orders = await Order.find({ user: req.user.id }).sort({ createdAt: -1 });
+  res.json(orders);
+}
+
+export async function getMyOrderById(req, res) {
+  const order = await Order.findOne({ _id: req.params.id, user: req.user.id });
+  if (!order) return res.status(404).json({ message: "Order not found" });
+  res.json(order);
+}
+
+// ---------- ADMIN ----------
+export async function allOrders(req, res) {
+  const { page = 1, limit = 20 } = req.query;
+  const skip = (Number(page) - 1) * Number(limit);
+
+  const [items, total] = await Promise.all([
+    Order.find()
+      .populate("user", "name email")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit)),
+    Order.countDocuments()
+  ]);
+
+  res.json({ items, total, page: Number(page), pages: Math.ceil(total / Number(limit)) });
+}
+
+const statusSchema = z.object({
+  status: z.enum(["pending", "confirmed", "shipped", "delivered", "cancelled"])
+});
+
+// Admin update status (and restore stock on cancel)
+export async function updateOrderStatus(req, res) {
+  const parsed = statusSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ message: "Invalid status", errors: parsed.error.errors });
+  }
+
+  const order = await Order.findById(req.params.id);
+  if (!order) return res.status(404).json({ message: "Order not found" });
+
+  const newStatus = parsed.data.status;
+
+  // If cancelling and was not already cancelled, restore stock
+  if (newStatus === "cancelled" && order.status !== "cancelled") {
+    for (const item of order.items) {
+      await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.qty } });
+    }
+  }
+
+  order.status = newStatus;
+
+  // If delivered, you can optionally mark payment as paid for COD
+  if (newStatus === "delivered" && order.payment.method === "cod") {
+    order.payment.status = "paid";
+  }
+
+  await order.save();
+  res.json(order);
 }
