@@ -1,22 +1,40 @@
 openapi: 3.0.0
+
 info:
   title: Clothing Backend API
   version: 1.0.0
+  description: Backend APIs for Clothing E-commerce Platform
+
 servers:
   - url: https://clothingbackend-cotb.onrender.com
   - url: http://localhost:5000
 
+# 🔐 JWT AUTH
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
+
 paths:
+
   /health:
     get:
       summary: Health check
+      security: []
       responses:
         "200":
-          description: OK
+          description: Server is running
 
+  # ---------------- AUTH ----------------
   /api/auth/register:
     post:
-      summary: Register user
+      summary: Register new user
+      security: []
       requestBody:
         required: true
         content:
@@ -25,15 +43,23 @@ paths:
               type: object
               required: [name, email, password]
               properties:
-                name: { type: string }
-                email: { type: string }
-                password: { type: string }
+                name:
+                  type: string
+                  example: Devansh
+                email:
+                  type: string
+                  example: dev@gmail.com
+                password:
+                  type: string
+                  example: 123456
       responses:
-        "201": { description: Created }
+        "201":
+          description: User registered
 
   /api/auth/login:
     post:
       summary: Login user
+      security: []
       requestBody:
         required: true
         content:
@@ -42,92 +68,264 @@ paths:
               type: object
               required: [email, password]
               properties:
-                email: { type: string }
-                password: { type: string }
+                email:
+                  type: string
+                  example: dev@gmail.com
+                password:
+                  type: string
+                  example: 123456
       responses:
-        "200": { description: OK }
+        "200":
+          description: JWT token returned
 
+  # ---------------- CATEGORIES ----------------
   /api/categories:
     get:
-      summary: List categories
+      summary: Get all categories
+      security: []
       responses:
-        "200": { description: OK }
-    post:
-      summary: Create category (admin)
-      responses:
-        "201": { description: Created }
+        "200":
+          description: List of categories
 
+    post:
+      summary: Create category (Admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  example: T-Shirts
+      responses:
+        "201":
+          description: Category created
+
+  # ---------------- PRODUCTS ----------------
   /api/products:
     get:
-      summary: List products (search/filter)
+      summary: Get products with filters
+      security: []
       parameters:
         - in: query
           name: q
           schema: { type: string }
+          example: oversized
+        - in: query
+          name: page
+          schema: { type: integer }
+          example: 1
+        - in: query
+          name: limit
+          schema: { type: integer }
+          example: 12
+        - in: query
+          name: minPrice
+          schema: { type: number }
+        - in: query
+          name: maxPrice
+          schema: { type: number }
       responses:
-        "200": { description: OK }
+        "200":
+          description: Product list
+
     post:
-      summary: Create product (admin)
+      summary: Create product (Admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, slug, price, stock]
+              properties:
+                title:
+                  type: string
+                  example: Black Oversized T-Shirt
+                slug:
+                  type: string
+                  example: black-oversized-tshirt
+                price:
+                  type: number
+                  example: 499
+                mrp:
+                  type: number
+                  example: 999
+                stock:
+                  type: integer
+                  example: 50
+                category:
+                  type: string
+                  example: 6971c814c46738a1c78cdb62
+                sizes:
+                  type: array
+                  items: { type: string }
+                  example: [S, M, L, XL]
+                colors:
+                  type: array
+                  items: { type: string }
+                  example: [Black]
       responses:
-        "201": { description: Created }
+        "201":
+          description: Product created
 
   /api/products/{slug}:
     get:
       summary: Get product by slug
+      security: []
       parameters:
         - in: path
           name: slug
           required: true
           schema: { type: string }
+          example: black-oversized-tshirt
       responses:
-        "200": { description: OK }
+        "200":
+          description: Product details
 
+  # ---------------- CART ----------------
   /api/cart:
     get:
-      summary: Get my cart (auth)
+      summary: Get my cart
       responses:
-        "200": { description: OK }
-    post:
-      summary: Add to cart (auth)
-      responses:
-        "201": { description: Created }
-    put:
-      summary: Update cart item qty (auth)
-      responses:
-        "200": { description: OK }
+        "200":
+          description: Cart details
 
-  /api/orders:
     post:
-      summary: Create order (auth)
+      summary: Add item to cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [product, qty]
+              properties:
+                product:
+                  type: string
+                  example: 6971c879c46738a1c78cdb68
+                qty:
+                  type: integer
+                  example: 2
+                size:
+                  type: string
+                  example: M
+                color:
+                  type: string
+                  example: Black
       responses:
-        "201": { description: Created }
+        "201":
+          description: Item added
+
+    put:
+      summary: Update cart item quantity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [product, qty]
+              properties:
+                product:
+                  type: string
+                  example: 6971c879c46738a1c78cdb68
+                qty:
+                  type: integer
+                  example: 3
+      responses:
+        "200":
+          description: Cart updated
+
+  # ---------------- ORDERS (COD) ----------------
+  /api/orders/cod/from-cart:
+    post:
+      summary: Place COD order from cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [shippingAddress]
+              properties:
+                shippingAddress:
+                  type: object
+                  required: [fullName, phone, line1, city, state, pincode]
+                  properties:
+                    fullName:
+                      type: string
+                      example: Devansh Mishra
+                    phone:
+                      type: string
+                      example: 9999999999
+                    line1:
+                      type: string
+                      example: Near XYZ
+                    city:
+                      type: string
+                      example: Lucknow
+                    state:
+                      type: string
+                      example: UP
+                    pincode:
+                      type: string
+                      example: 226001
+      responses:
+        "201":
+          description: Order created
 
   /api/orders/me:
     get:
-      summary: My orders (auth)
+      summary: Get my orders
       responses:
-        "200": { description: OK }
+        "200":
+          description: My orders list
 
-  /api/orders/from-cart:
-    post:
-      summary: Create order from cart (auth)
-      responses:
-        "201": { description: Created }
-
+  # ---------------- UPLOAD ----------------
   /api/upload:
     post:
-      summary: Upload single image (admin)
+      summary: Upload single image (Admin)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
       responses:
-        "201": { description: Created }
+        "201":
+          description: Image uploaded
 
   /api/upload/multiple:
     post:
-      summary: Upload multiple images (admin)
+      summary: Upload multiple images (Admin)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
       responses:
-        "201": { description: Created }
+        "201":
+          description: Images uploaded
 
+  # ---------------- ADMIN ----------------
   /api/admin/users:
     get:
-      summary: List users (admin)
+      summary: List all users (Admin)
       responses:
-        "200": { description: OK }
+        "200":
+          description: Users list
