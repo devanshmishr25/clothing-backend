@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { requireAuth, requireRole } from "../middleware/auth.js";
+import { updateOrderStatus } from "../controllers/order.controller.js";
+
 import {
   createCodOrderFromCart,
   myOrders,

@@ -329,3 +329,28 @@ paths:
       responses:
         "200":
           description: Users list
+
+  /api/orders/{id}/status:
+  put:
+    summary: Update order status (Admin)
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: shipped
+    responses:
+      "200":
+        description: Order updated

@@ -76,7 +76,8 @@ export async function createCodOrderFromCart(req, res) {
     shippingAddress,
     totals: { subtotal, shipping, discount, grandTotal },
     payment: { method: "cod", status: "pending" },
-    status: "pending"
+    status: "pending",
+    statusHistory: [{ status: "pending" }]
   });
 
   // Clear cart
@@ -146,5 +147,33 @@ export async function updateOrderStatus(req, res) {
   }
 
   await order.save();
+  res.json(order);
+}
+
+export async function updateOrderStatus(req, res) {
+  const { status } = req.body;
+
+  const allowed = [
+    "pending",
+    "confirmed",
+    "shipped",
+    "delivered",
+    "cancelled"
+  ];
+
+  if (!allowed.includes(status)) {
+    return res.status(400).json({ message: "Invalid status" });
+  }
+
+  const order = await Order.findById(req.params.id);
+  if (!order) {
+    return res.status(404).json({ message: "Order not found" });
+  }
+
+  order.status = status;
+  order.statusHistory.push({ status });
+
+  await order.save();
+
   res.json(order);
 }
