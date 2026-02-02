@@ -61,3 +61,10 @@ export async function login(req, res) {
     user: { id: user._id, name: user.name, email: user.email, role: user.role }
   });
 }
+
+export async function logout(req, res) {
+  res.json({
+    message: "Logged out successfully"
+  });
+}
+
