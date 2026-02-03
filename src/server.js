@@ -11,7 +11,7 @@ async function start() {
 
   app.listen(PORT, () => {
     console.log(
-      `🚀 Server running at http://localhost:${PORT}`
+      `Server running at http://localhost:${PORT}`
     );
   });
 }

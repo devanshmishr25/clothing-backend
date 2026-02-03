@@ -10,7 +10,7 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
     key_secret: process.env.RAZORPAY_KEY_SECRET,
   });
 } else {
-  console.warn("⚠ Razorpay keys not found. Payment disabled.");
+  console.warn("Razorpay keys not found. Payment disabled.");
 }
 
 
