@@ -8,6 +8,8 @@ import {
   ordersByStatus,
   salesLast7Days
 } from "../controllers/admin.controller.js";
+import { getDashboardStats } from "../controllers/admin.controller.js";
+
 
 const router = Router();
 
@@ -20,5 +22,13 @@ router.delete("/users/:id", requireAuth, requireRole("admin"), deactivateUser);
 router.get("/analytics/summary", requireAuth, requireRole("admin"), summary);
 router.get("/analytics/orders-by-status", requireAuth, requireRole("admin"), ordersByStatus);
 router.get("/analytics/sales-last-7-days", requireAuth, requireRole("admin"), salesLast7Days);
+
+// Dashboard
+router.get(
+  "/dashboard",
+  requireAuth,
+  requireRole("admin"),
+  getDashboardStats
+);
 
 export default router;

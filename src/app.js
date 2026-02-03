@@ -16,6 +16,11 @@ import orderRoutes from "./routes/order.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
 import uploadRoutes from "./routes/upload.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import userRoutes from "./routes/user.routes.js";
+import wishlistRoutes from "./routes/wishlist.routes.js";
+import addressRoutes from "./routes/address.routes.js";
+import paymentRoutes from "./routes/payment.routes.js";
+
 
 const app = express();
 
@@ -45,6 +50,12 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/wishlist", wishlistRoutes);
+app.use("/api/addresses", addressRoutes);
+app.use("/api/payment", paymentRoutes);
+
+
 const swaggerDocument = YAML.load(path.join(process.cwd(), "src", "swagger.yaml"));
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 

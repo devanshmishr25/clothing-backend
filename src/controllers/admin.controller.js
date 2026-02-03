@@ -125,3 +125,60 @@ export async function salesLast7Days(req, res) {
 
   res.json(data);
 }
+
+// ---------- Dashboard ----------
+
+export async function getDashboardStats(req, res) {
+  try {
+    // counts
+    const totalUsers = await User.countDocuments();
+    const totalProducts = await Product.countDocuments();
+    const totalOrders = await Order.countDocuments();
+
+    // revenue
+    const revenueResult = await Order.aggregate([
+      { $match: { status: "delivered" } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$totals.grandTotal" }
+        }
+      }
+    ]);
+
+    const totalRevenue = revenueResult[0]?.total || 0;
+
+    // today's orders
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const ordersToday = await Order.countDocuments({
+      createdAt: { $gte: today }
+    });
+
+    // recent orders
+    const recentOrders = await Order.find()
+      .populate("user", "name email")
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    // low stock alert
+    const lowStockProducts = await Product.find({
+      stock: { $lt: 10 }
+    }).select("title stock");
+
+    res.json({
+      stats: {
+        totalUsers,
+        totalProducts,
+        totalOrders,
+        totalRevenue,
+        ordersToday
+      },
+      recentOrders,
+      lowStockProducts
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Dashboard error" });
+  }
+}

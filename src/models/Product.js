@@ -19,7 +19,11 @@ const productSchema = new mongoose.Schema(
     colors: [{ type: String }],
 
     stock: { type: Number, default: 0, min: 0 },
-    isActive: { type: Boolean, default: true }
+    isActive: { type: Boolean, default: true },
+
+    ratingsAverage: { type: Number, default: 0 },
+    ratingsCount: { type: Number, default: 0 },
+
   },
   { timestamps: true }
 );

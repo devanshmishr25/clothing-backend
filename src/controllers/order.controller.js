@@ -87,6 +87,45 @@ export async function createCodOrderFromCart(req, res) {
   res.status(201).json(order);
 }
 
+// USER cancel order
+export async function cancelOrder(req, res) {
+  const order = await Order.findOne({
+    _id: req.params.id,
+    user: req.user.id
+  });
+
+  if (!order)
+    return res.status(404).json({ message: "Order not found" });
+
+  // Cannot cancel after shipped
+  if (["shipped", "delivered"].includes(order.status)) {
+    return res
+      .status(400)
+      .json({ message: "Order cannot be cancelled now" });
+  }
+
+  // Already cancelled
+  if (order.status === "cancelled") {
+    return res
+      .status(400)
+      .json({ message: "Order already cancelled" });
+  }
+
+  // Restore stock
+  for (const item of order.items) {
+    await Product.findByIdAndUpdate(item.product, {
+      $inc: { stock: item.qty }
+    });
+  }
+
+  order.status = "cancelled";
+  order.statusHistory.push({ status: "cancelled" });
+
+  await order.save();
+
+  res.json({ message: "Order cancelled", order });
+}
+
 // ---------- USER ----------
 export async function myOrders(req, res) {
   const orders = await Order.find({ user: req.user.id }).sort({ createdAt: -1 });
@@ -132,7 +171,7 @@ export async function updateOrderStatus(req, res) {
 
   const newStatus = parsed.data.status;
 
-  // If cancelling and was not already cancelled, restore stock
+  // Restore stock if cancelled
   if (newStatus === "cancelled" && order.status !== "cancelled") {
     for (const item of order.items) {
       await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.qty } });
@@ -141,37 +180,12 @@ export async function updateOrderStatus(req, res) {
 
   order.status = newStatus;
 
-  // If delivered, you can optionally mark payment as paid for COD
+  // COD becomes paid after delivery
   if (newStatus === "delivered" && order.payment.method === "cod") {
     order.payment.status = "paid";
   }
 
-  await order.save();
-  res.json(order);
-}
-
-export async function updateOrderStatus(req, res) {
-  const { status } = req.body;
-
-  const allowed = [
-    "pending",
-    "confirmed",
-    "shipped",
-    "delivered",
-    "cancelled"
-  ];
-
-  if (!allowed.includes(status)) {
-    return res.status(400).json({ message: "Invalid status" });
-  }
-
-  const order = await Order.findById(req.params.id);
-  if (!order) {
-    return res.status(404).json({ message: "Order not found" });
-  }
-
-  order.status = status;
-  order.statusHistory.push({ status });
+  order.statusHistory.push({ status: newStatus });
 
   await order.save();
 

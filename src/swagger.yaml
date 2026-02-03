@@ -9,7 +9,6 @@ servers:
   - url: https://clothingbackend-cotb.onrender.com
   - url: http://localhost:5000
 
-# 🔐 JWT AUTH
 components:
   securitySchemes:
     bearerAuth:
@@ -21,7 +20,6 @@ security:
   - bearerAuth: []
 
 paths:
-
   /health:
     get:
       summary: Health check
@@ -30,7 +28,7 @@ paths:
         "200":
           description: Server is running
 
-  # ---------------- AUTH ----------------
+  # ---------- AUTH ----------
   /api/auth/register:
     post:
       summary: Register new user
@@ -79,16 +77,13 @@ paths:
           description: JWT token returned
 
   /api/auth/logout:
-  post:
-    summary: Logout user
-    security:
-      - bearerAuth: []
-    responses:
-      "200":
-        description: Logged out successfully
+    post:
+      summary: Logout user
+      responses:
+        "200":
+          description: Logged out successfully
 
-
-  # ---------------- CATEGORIES ----------------
+  # ---------- CATEGORIES ----------
   /api/categories:
     get:
       summary: Get all categories
@@ -114,7 +109,7 @@ paths:
         "201":
           description: Category created
 
-  # ---------------- PRODUCTS ----------------
+  # ---------- PRODUCTS ----------
   /api/products:
     get:
       summary: Get products with filters
@@ -132,12 +127,6 @@ paths:
           name: limit
           schema: { type: integer }
           example: 12
-        - in: query
-          name: minPrice
-          schema: { type: number }
-        - in: query
-          name: maxPrice
-          schema: { type: number }
       responses:
         "200":
           description: Product list
@@ -154,30 +143,12 @@ paths:
               properties:
                 title:
                   type: string
-                  example: Black Oversized T-Shirt
                 slug:
                   type: string
-                  example: black-oversized-tshirt
                 price:
                   type: number
-                  example: 499
-                mrp:
-                  type: number
-                  example: 999
                 stock:
                   type: integer
-                  example: 50
-                category:
-                  type: string
-                  example: 6971c814c46738a1c78cdb62
-                sizes:
-                  type: array
-                  items: { type: string }
-                  example: [S, M, L, XL]
-                colors:
-                  type: array
-                  items: { type: string }
-                  example: [Black]
       responses:
         "201":
           description: Product created
@@ -190,13 +161,13 @@ paths:
         - in: path
           name: slug
           required: true
-          schema: { type: string }
-          example: black-oversized-tshirt
+          schema:
+            type: string
       responses:
         "200":
           description: Product details
 
-  # ---------------- CART ----------------
+  # ---------- CART ----------
   /api/cart:
     get:
       summary: Get my cart
@@ -212,20 +183,6 @@ paths:
           application/json:
             schema:
               type: object
-              required: [product, qty]
-              properties:
-                product:
-                  type: string
-                  example: 6971c879c46738a1c78cdb68
-                qty:
-                  type: integer
-                  example: 2
-                size:
-                  type: string
-                  example: M
-                color:
-                  type: string
-                  example: Black
       responses:
         "201":
           description: Item added
@@ -238,52 +195,175 @@ paths:
           application/json:
             schema:
               type: object
-              required: [product, qty]
-              properties:
-                product:
-                  type: string
-                  example: 6971c879c46738a1c78cdb68
-                qty:
-                  type: integer
-                  example: 3
       responses:
         "200":
           description: Cart updated
 
-  # ---------------- ORDERS (COD) ----------------
-  /api/orders/cod/from-cart:
+    # ---------- WISHLIST ----------
+
+  /api/wishlist:
+    get:
+      summary: Get my wishlist
+      responses:
+        "200":
+          description: Wishlist items
+
     post:
-      summary: Place COD order from cart
+      summary: Add product to wishlist
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [shippingAddress]
+              required: [productId]
               properties:
-                shippingAddress:
-                  type: object
-                  required: [fullName, phone, line1, city, state, pincode]
-                  properties:
-                    fullName:
-                      type: string
-                      example: Devansh Mishra
-                    phone:
-                      type: string
-                      example: 9999999999
-                    line1:
-                      type: string
-                      example: Near XYZ
-                    city:
-                      type: string
-                      example: Lucknow
-                    state:
-                      type: string
-                      example: UP
-                    pincode:
-                      type: string
-                      example: 226001
+                productId:
+                  type: string
+      responses:
+        "200":
+          description: Added
+
+  /api/wishlist/{productId}:
+    delete:
+      summary: Remove product from wishlist
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Removed
+
+    # ---------- USER PROFILE ----------
+  /api/users/me:
+    get:
+      summary: Get my profile
+      description: Returns logged-in user profile
+      responses:
+        "200":
+          description: User profile fetched
+          content:
+            application/json:
+              example:
+                id: "697321f330ddd14a9cffb974"
+                name: "Devansh Mishra"
+                email: "dev@gmail.com"
+                phone: "9999999999"
+                avatar: "https://image-url.com/avatar.jpg"
+
+    put:
+      summary: Update my profile
+      description: Update logged-in user's profile details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Devansh Mishra
+                phone:
+                  type: string
+                  example: "9999999999"
+                avatar:
+                  type: string
+                  example: https://image-url.com/avatar.jpg
+      responses:
+        "200":
+          description: Profile updated
+          content:
+            application/json:
+              example:
+                message: Profile updated
+                user:
+                  id: "697321f330ddd14a9cffb974"
+                  name: Devansh Mishra
+                  email: dev@gmail.com
+                  phone: "9999999999"
+                  avatar: https://image-url.com/avatar.jpg
+
+  # ---------- ADDRESS ----------
+  /api/addresses:
+    get:
+      summary: Get my addresses
+      responses:
+        "200":
+          description: Address list
+
+    post:
+      summary: Add new address
+      description: Save a delivery address for logged-in user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                [fullName, phone, line1, city, state, pincode]
+              properties:
+                fullName:
+                  type: string
+                  example: Devansh Mishra
+                phone:
+                  type: string
+                  example: "9999999999"
+                line1:
+                  type: string
+                  example: Street 1, Near Metro
+                line2:
+                  type: string
+                  example: Apartment 201
+                city:
+                  type: string
+                  example: Lucknow
+                state:
+                  type: string
+                  example: Uttar Pradesh
+                pincode:
+                  type: string
+                  example: "226001"
+                country:
+                  type: string
+                  example: India
+                isDefault:
+                  type: boolean
+                  example: true
+
+  /api/addresses/{id}:
+    put:
+      summary: Update address
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Address updated
+
+    delete:
+      summary: Delete address
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Address deleted
+
+  # ---------- ORDERS ----------
+  /api/orders/cod/from-cart:
+    post:
+      summary: Place COD order
       responses:
         "201":
           description: Order created
@@ -293,74 +373,128 @@ paths:
       summary: Get my orders
       responses:
         "200":
-          description: My orders list
+          description: Orders list
 
-  # ---------------- UPLOAD ----------------
-  /api/upload:
-    post:
-      summary: Upload single image (Admin)
+  /api/orders/{id}/status:
+    put:
+      summary: Admin update order status
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               type: object
+              required: [status]
               properties:
-                image:
+                status:
                   type: string
-                  format: binary
+                  enum:
+                    - pending
+                    - confirmed
+                    - shipped
+                    - delivered
+                    - cancelled
+      responses:
+        "200":
+          description: Order updated
+
+  # ---------- CANCEL ORDER ----------
+
+  /api/orders/{id}/cancel:
+    put:
+      summary: Cancel my order
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Order cancelled
+
+  # ---------- REVIEWS ----------
+
+  /api/products/{id}/review:
+    post:
+      summary: Add or update product review
+      description: Logged-in user can add or update review for a product
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+          type: string
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [rating]
+              properties:
+                rating:
+                  type: number
+                  example: 5
+                comment:
+                  type: string
+                  example: Great quality product!
+            example:
+              rating: 5
+              comment: Great quality product!
+
+      responses:
+        "200":
+          description: Review saved successfully
+
+  /api/products/{id}/reviews:
+    get:
+      summary: Get product reviews
+      description: Returns all reviews for a product
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: Reviews list returned
+
+  # ---------- UPLOAD ----------
+  /api/upload:
+    post:
+      summary: Upload single image
       responses:
         "201":
-          description: Image uploaded
+          description: Uploaded
 
   /api/upload/multiple:
     post:
-      summary: Upload multiple images (Admin)
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                images:
-                  type: array
-                  items:
-                    type: string
-                    format: binary
+      summary: Upload multiple images
       responses:
         "201":
-          description: Images uploaded
+          description: Uploaded
 
-  # ---------------- ADMIN ----------------
+  # ---------- ADMIN ----------
   /api/admin/users:
     get:
-      summary: List all users (Admin)
+      summary: List all users
       responses:
         "200":
           description: Users list
 
-  /api/orders/{id}/status:
-  put:
-    summary: Update order status (Admin)
-    security:
-      - bearerAuth: []
-    parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              status:
-                type: string
-                example: shipped
-    responses:
-      "200":
-        description: Order updated
+  /api/admin/dashboard:
+    get:
+      summary: Admin dashboard statistics
+      responses:
+        "200":
+          description: Dashboard stats returned
