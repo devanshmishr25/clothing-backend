@@ -1,4 +1,5 @@
 ##
+<<<<<<< HEAD
 ✅ 0. Check server
 Health check
 GET /health
@@ -185,3 +186,6 @@ PUT /api/users/me
 
 ✅ 17. Admin dashboard
 GET /api/admin/dashboard
+=======
+https://clothing-backend-8u4o.onrender.com/docs/
+>>>>>>> 34b28359dce753b73c9a5293e9071c453f8d2331
