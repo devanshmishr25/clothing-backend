@@ -404,6 +404,56 @@ paths:
         "200":
           description: Order updated
 
+  # ---------- PAYMENTS ----------
+  /api/payment/create-order:
+    post:
+      summary: Create Razorpay payment order
+      description: Creates payment order for an existing backend order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [orderId]
+              properties:
+                orderId:
+                  type: string
+                  example: 6971cd4cbaefbdd724feae90
+      responses:
+        "200":
+          description: Payment order created
+
+  /api/payment/verify:
+    post:
+      summary: Verify payment after checkout
+      description: Verifies Razorpay payment and updates order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                [razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId]
+              properties:
+                razorpay_order_id:
+                  type: string
+                  example: order_xxxxx
+                razorpay_payment_id:
+                  type: string
+                  example: pay_xxxxx
+                razorpay_signature:
+                  type: string
+                  example: signature_here
+                orderId:
+                  type: string
+                  example: 6971cd4cbaefbdd724feae90
+      responses:
+        "200":
+          description: Payment verified successfully
+
+
   # ---------- CANCEL ORDER ----------
 
   /api/orders/{id}/cancel:
