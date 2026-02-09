@@ -7,11 +7,9 @@ This backend supports scalable multi-user operations and integrates image upload
 
 ## 🌐 Live API
 
-Backend deployed on Render:  
-👉 https://clothing-backend-8u4o.onrender.com
+Backend deployed on Render: https://clothing-backend-8u4o.onrender.com
 
-Health check endpoint:
-GET /health
+Health check endpoint: GET /health
 
 
 ---
@@ -116,13 +114,9 @@ RAZORPAY_KEY_SECRET=xxx
 
 ## 📘 API Documentation
 
-Swagger documentation is available at:
+Swagger documentation is available at: /docs
 
-/docs
-
-
-Example:
-http://localhost:5000/docs
+Example:http://localhost:5000/docs
 
 
 ---
