@@ -67,7 +67,7 @@ GET /health
 ---
 
 ## 📁 Project Structure
-
+```
 src/
 │
 ├── config/ # Database & service configuration
@@ -83,7 +83,7 @@ src/
 │
 ├── app.js # Express app configuration
 └── server.js # Application entry point
-
+```
 
 ---
 
@@ -142,7 +142,6 @@ http://localhost:5000/docs
 ## 👨‍💻 Author
 
 **Devansh Mishra**  
-Backend Developer
 
 ---
 
