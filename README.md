@@ -1,191 +1,134 @@
-##
-<<<<<<< HEAD
-✅ 0. Check server
-Health check
-GET /health
+# 🛍 Clothing E-Commerce Backend API
+
+Backend service for a clothing e-commerce platform providing REST APIs for authentication, products, cart, orders, payments, and user management.
+This backend supports scalable multi-user operations and integrates image uploads and online payments.
+
+-----------------------------------------
+
+## 🌐 Live API
 
+Backend deployed on Render: https://clothing-backend-8u4o.onrender.com
+Health check endpoint: GET /health
 
-Should return:
+-----------------------------------------
 
-{ "ok": true }
+## 🚀 Features
 
-✅ 1. Register user
-POST /api/auth/register
+### 👤 User Features
+- User registration & login using JWT authentication
+- Profile management
+- Address management
+- Product browsing & filtering
+- Cart management
+- Wishlist support
+- Cash on Delivery (COD) order placement
+- Order cancellation
+- Product reviews & ratings
 
+### 🛠 Admin Features
+- Product management APIs
+- Category management
+- Order status management
+- User management
+- Dashboard statistics
 
-Body:
+### ⚡ Additional Features
+- Image upload using Cloudinary
+- Razorpay payment integration
+- Swagger API documentation
+- Role-based authorization
+- Stock validation & management
+- Production-ready deployment
 
-{
-  "name": "Devansh",
-  "email": "dev@gmail.com",
-  "password": "123456"
-}
+-----------------------------------------
 
-✅ 2. Login user
-POST /api/auth/login
+## 🧱 Tech Stack
 
+### Backend
+- Node.js
+- Express.js
+- MongoDB & Mongoose
+- JWT Authentication
+- REST API architecture
 
-Body:
+### Integrations
+- Cloudinary (image storage)
+- Razorpay (payment gateway)
+- Swagger (API documentation)
 
-{
-  "email": "dev@gmail.com",
-  "password": "123456"
-}
+### Deployment
+- Render
+- MongoDB Atlas
 
+-----------------------------------------
 
-Response gives:
+## 📁 Project Structure
 
-{
-  "token": "xxxxx"
-}
+src/
+│
+├── config/ # Database & service configuration
+│ └── db.js
+│
+├── controllers/ # Business logic
+│
+├── middleware/ # Auth & error middleware
+│
+├── models/ # MongoDB schemas
+│
+├── routes/ # API routes
+│
+├── app.js # Express app config
+└── server.js # Application entry point
 
-🔑 Save token
+-----------------------------------------
 
-In Postman headers for future requests:
+## 🔐 Authentication
 
-Authorization: Bearer TOKEN
+Authentication is handled using JWT tokens.
+Protected routes require: Authorization: Bearer <token>
 
-✅ 3. Get categories
-GET /api/categories
+-----------------------------------------
 
-✅ 4. Admin creates category (admin token)
-POST /api/categories
+## ⚙️ Environment Variables
 
+Create a `.env` file:
 
-Body:
+PORT=5000
+MONGO_URI=your_mongodb_uri
+JWT_SECRET=your_secret_key
+CLOUDINARY_CLOUD_NAME=xxx
+CLOUDINARY_API_KEY=xxx
+CLOUDINARY_API_SECRET=xxx
+RAZORPAY_KEY_ID=xxx
+RAZORPAY_KEY_SECRET=xxx
 
-{
-  "name": "T-Shirts"
-}
+-----------------------------------------
 
-✅ 5. Admin creates product
-POST /api/products
+## 📘 API Documentation
 
+Swagger documentation available at: /docs
 
-Body example:
+Example:
+http://localhost:5000/docs
 
-{
-  "title": "Black Oversized T-Shirt",
-  "slug": "black-oversized-tshirt",
-  "price": 499,
-  "stock": 50,
-  "category": "CATEGORY_ID"
-}
+-----------------------------------------
 
-✅ 6. View products
-GET /api/products
+## Security Features
 
+- JWT authentication
+- Role-based authorization
+- Input validation
+- Error handling middleware
+- Secure environment configuration
 
-Copy product _id.
+-----------------------------------------
 
-✅ 7. Add product to cart
-POST /api/cart
+## 👨‍💻 Author
 
+**Devansh Mishra**  
 
-Body:
+-----------------------------------------
 
-{
-  "product": "PRODUCT_ID",
-  "qty": 2,
-  "size": "M",
-  "color": "Black"
-}
+## 📄 License
 
-✅ 8. View cart
-GET /api/cart
-
-✅ 9. Add address
-POST /api/addresses
-
-
-Body:
-
-{
-  "fullName": "Devansh Mishra",
-  "phone": "9999999999",
-  "line1": "Street 1",
-  "city": "Lucknow",
-  "state": "UP",
-  "pincode": "226001"
-}
-
-✅ 10. Place COD order
-POST /api/orders/cod/from-cart
-
-
-Body:
-
-{
-  "shippingAddress": {
-    "fullName": "Devansh Mishra",
-    "phone": "9999999999",
-    "line1": "Street 1",
-    "city": "Lucknow",
-    "state": "UP",
-    "pincode": "226001"
-  }
-}
-
-
-Cart becomes empty, order created.
-
-✅ 11. View orders
-GET /api/orders/me
-
-
-Copy order ID.
-
-✅ 12. Admin updates order status
-
-Admin token required.
-
-PUT /api/orders/{id}/status
-
-
-Body:
-
-{ "status": "confirmed" }
-
-
-Then:
-
-{ "status": "shipped" }
-
-
-Then:
-
-{ "status": "delivered" }
-
-✅ 13. User cancels order (if allowed)
-PUT /api/orders/{id}/cancel
-
-✅ 14. Add review
-POST /api/products/{id}/review
-
-
-Body:
-
-{
-  "rating": 5,
-  "comment": "Great quality"
-}
-
-✅ 15. Wishlist
-
-Add:
-
-POST /api/wishlist
-
-
-Remove:
-
-DELETE /api/wishlist/{productId}
-
-✅ 16. Profile update
-PUT /api/users/me
-
-✅ 17. Admin dashboard
-GET /api/admin/dashboard
-=======
-https://clothing-backend-8u4o.onrender.com/docs/
->>>>>>> 34b28359dce753b73c9a5293e9071c453f8d2331
+This project is developed for learning and internal company usage.
