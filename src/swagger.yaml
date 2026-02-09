@@ -83,7 +83,7 @@ paths:
         "200":
           description: Logged out successfully
 
-  # ---------- CATEGORIES ----------
+  # ---------- CATEGORIES ---------
   /api/categories:
     get:
       summary: Get all categories
