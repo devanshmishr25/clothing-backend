@@ -6,26 +6,28 @@ import User from "../models/User.js";
 const registerSchema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
-  password: z.string().min(6)
+  password: z.string().min(6),
 });
 
 const loginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6)
+  password: z.string().min(6),
 });
 
 function signToken(user) {
   return jwt.sign(
     { id: user._id, role: user.role, email: user.email },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
+    { expiresIn: process.env.JWT_EXPIRES_IN || "7d" },
   );
 }
 
 export async function register(req, res) {
   const parsed = registerSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+    return res
+      .status(400)
+      .json({ message: "Invalid data", errors: parsed.error.errors });
   }
 
   const { name, email, password } = parsed.data;
@@ -38,14 +40,16 @@ export async function register(req, res) {
 
   res.status(201).json({
     token: signToken(user),
-    user: { id: user._id, name: user.name, email: user.email, role: user.role }
+    user: { id: user._id, name: user.name, email: user.email, role: user.role },
   });
 }
 
 export async function login(req, res) {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+    return res
+      .status(400)
+      .json({ message: "Invalid data", errors: parsed.error.errors });
   }
 
   const { email, password } = parsed.data;
@@ -58,13 +62,12 @@ export async function login(req, res) {
 
   res.json({
     token: signToken(user),
-    user: { id: user._id, name: user.name, email: user.email, role: user.role }
+    user: { id: user._id, name: user.name, email: user.email, role: user.role },
   });
 }
 
 export async function logout(req, res) {
   res.json({
-    message: "Logged out successfully"
+    message: "Logged out successfully",
   });
 }
-

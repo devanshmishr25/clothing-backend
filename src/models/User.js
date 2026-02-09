@@ -19,7 +19,6 @@ const userSchema = new mongoose.Schema(
       default: "user"
     },
 
-    // ✅ Profile fields
     phone: { type: String },
     avatar: { type: String }, // profile image URL
 

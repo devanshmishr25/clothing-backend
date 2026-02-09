@@ -28,20 +28,16 @@ app.get("/", (req, res) => {
   res.send("Clothing Backend API is running ✅ Use /health or /docs");
 });
 
+app.get("/health", (req, res) => {
+  res.json({ ok: true, message: "Backend running ✅" });
+});
+
 
 app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
 app.use(express.json({ limit: "2mb" }));
 app.use(morgan("dev"));
 
-// ✅ Put this AFTER app is created
-app.get("/", (req, res) => {
-  res.send("Clothing Backend API is running ✅ Use /health or /docs");
-});
-
-app.get("/health", (req, res) => {
-  res.json({ ok: true, message: "Backend running ✅" });
-});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/categories", categoryRoutes);

@@ -23,7 +23,7 @@ router.post(
   uploadMultipleImages
 );
 
-// ✅ NEW: Delete by publicId (URL encoded)
+// Delete by publicId (URL encoded)
 router.delete("/:publicId", requireAuth, requireRole("admin"), deleteImage);
 
 export default router;

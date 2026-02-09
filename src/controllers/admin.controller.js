@@ -9,7 +9,7 @@ export async function listUsers(req, res) {
 
   // include users created before adding isActive
   const filter = {
-    $or: [{ isActive: true }, { isActive: { $exists: false } }]
+    $or: [{ isActive: true }, { isActive: { $exists: false } }],
   };
 
   if (q && String(q).trim().length > 0) {
@@ -17,9 +17,9 @@ export async function listUsers(req, res) {
       {
         $or: [
           { name: { $regex: q, $options: "i" } },
-          { email: { $regex: q, $options: "i" } }
-        ]
-      }
+          { email: { $regex: q, $options: "i" } },
+        ],
+      },
     ];
   }
 
@@ -31,31 +31,33 @@ export async function listUsers(req, res) {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(Number(limit)),
-    User.countDocuments(filter)
+    User.countDocuments(filter),
   ]);
 
   res.json({
     items,
     total,
     page: Number(page),
-    pages: Math.ceil(total / Number(limit))
+    pages: Math.ceil(total / Number(limit)),
   });
 }
 
 const roleSchema = z.object({
-  role: z.enum(["user", "admin"])
+  role: z.enum(["user", "admin"]),
 });
 
 export async function updateUserRole(req, res) {
   const parsed = roleSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ message: "Invalid role", errors: parsed.error.errors });
+    return res
+      .status(400)
+      .json({ message: "Invalid role", errors: parsed.error.errors });
   }
 
   const user = await User.findByIdAndUpdate(
     req.params.id,
     { role: parsed.data.role },
-    { new: true }
+    { new: true },
   ).select("-passwordHash");
 
   if (!user) return res.status(404).json({ message: "User not found" });
@@ -67,7 +69,7 @@ export async function deactivateUser(req, res) {
   const user = await User.findByIdAndUpdate(
     req.params.id,
     { isActive: false },
-    { new: true }
+    { new: true },
   ).select("-passwordHash");
 
   if (!user) return res.status(404).json({ message: "User not found" });
@@ -78,14 +80,16 @@ export async function deactivateUser(req, res) {
 // ---------- Analytics ----------
 export async function summary(req, res) {
   const [users, products, orders] = await Promise.all([
-    User.countDocuments({ $or: [{ isActive: true }, { isActive: { $exists: false } }] }),
+    User.countDocuments({
+      $or: [{ isActive: true }, { isActive: { $exists: false } }],
+    }),
     Product.countDocuments({ isActive: true }),
-    Order.countDocuments()
+    Order.countDocuments(),
   ]);
 
   const revenueAgg = await Order.aggregate([
     { $match: { status: { $in: ["confirmed", "shipped", "delivered"] } } },
-    { $group: { _id: null, revenue: { $sum: "$totals.grandTotal" } } }
+    { $group: { _id: null, revenue: { $sum: "$totals.grandTotal" } } },
   ]);
 
   const revenue = revenueAgg[0]?.revenue || 0;
@@ -96,7 +100,7 @@ export async function summary(req, res) {
 export async function ordersByStatus(req, res) {
   const data = await Order.aggregate([
     { $group: { _id: "$status", count: { $sum: 1 } } },
-    { $sort: { count: -1 } }
+    { $sort: { count: -1 } },
   ]);
 
   res.json(data);
@@ -108,19 +112,24 @@ export async function salesLast7Days(req, res) {
   since.setHours(0, 0, 0, 0);
 
   const data = await Order.aggregate([
-    { $match: { createdAt: { $gte: since }, status: { $in: ["confirmed", "shipped", "delivered"] } } },
+    {
+      $match: {
+        createdAt: { $gte: since },
+        status: { $in: ["confirmed", "shipped", "delivered"] },
+      },
+    },
     {
       $group: {
         _id: {
           y: { $year: "$createdAt" },
           m: { $month: "$createdAt" },
-          d: { $dayOfMonth: "$createdAt" }
+          d: { $dayOfMonth: "$createdAt" },
         },
         orders: { $sum: 1 },
-        sales: { $sum: "$totals.grandTotal" }
-      }
+        sales: { $sum: "$totals.grandTotal" },
+      },
     },
-    { $sort: { "_id.y": 1, "_id.m": 1, "_id.d": 1 } }
+    { $sort: { "_id.y": 1, "_id.m": 1, "_id.d": 1 } },
   ]);
 
   res.json(data);
@@ -141,9 +150,9 @@ export async function getDashboardStats(req, res) {
       {
         $group: {
           _id: null,
-          total: { $sum: "$totals.grandTotal" }
-        }
-      }
+          total: { $sum: "$totals.grandTotal" },
+        },
+      },
     ]);
 
     const totalRevenue = revenueResult[0]?.total || 0;
@@ -153,7 +162,7 @@ export async function getDashboardStats(req, res) {
     today.setHours(0, 0, 0, 0);
 
     const ordersToday = await Order.countDocuments({
-      createdAt: { $gte: today }
+      createdAt: { $gte: today },
     });
 
     // recent orders
@@ -164,7 +173,7 @@ export async function getDashboardStats(req, res) {
 
     // low stock alert
     const lowStockProducts = await Product.find({
-      stock: { $lt: 10 }
+      stock: { $lt: 10 },
     }).select("title stock");
 
     res.json({
@@ -173,10 +182,10 @@ export async function getDashboardStats(req, res) {
         totalProducts,
         totalOrders,
         totalRevenue,
-        ordersToday
+        ordersToday,
       },
       recentOrders,
-      lowStockProducts
+      lowStockProducts,
     });
   } catch (error) {
     res.status(500).json({ message: "Dashboard error" });

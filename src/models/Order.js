@@ -37,7 +37,7 @@ const orderSchema = new mongoose.Schema(
     },
 
     payment: {
-      method: { type: String, enum: ["cod"], default: "cod" }, // COD only here
+      method: { type: String, enum: ["cod"], default: "cod" },
       status: {
         type: String,
         enum: ["pending", "paid", "failed"],

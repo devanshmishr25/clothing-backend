@@ -15,7 +15,7 @@ export async function uploadImage(req, res) {
   });
 }
 
-// ✅ NEW: delete by publicId
+
 export async function deleteImage(req, res) {
   const publicId = decodeURIComponent(req.params.publicId);
 

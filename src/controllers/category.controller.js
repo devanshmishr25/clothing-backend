@@ -11,11 +11,14 @@ export async function listCategories(req, res) {
 export async function createCategory(req, res) {
   const parsed = createSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+    return res
+      .status(400)
+      .json({ message: "Invalid data", errors: parsed.error.errors });
   }
 
   const exists = await Category.findOne({ name: parsed.data.name });
-  if (exists) return res.status(409).json({ message: "Category already exists" });
+  if (exists)
+    return res.status(409).json({ message: "Category already exists" });
 
   const created = await Category.create({ name: parsed.data.name });
   res.status(201).json(created);
