@@ -1,18 +1,15 @@
 # 🛍 Clothing E-Commerce Backend API
-
+```
 Backend service for a clothing e-commerce platform providing REST APIs for authentication, products, cart, orders, payments, and user management.
 This backend supports scalable multi-user operations and integrates image uploads and online payments.
-
+```
 ---
 
 ## 🌐 Live API
-
-Backend deployed on Render:  
-👉 https://clothing-backend-8u4o.onrender.com
-
-Health check endpoint:
-GET /health
-
+```
+Backend deployed on Render: https://clothing-backend-8u4o.onrender.com
+Health check endpoint: GET /health
+```
 
 ---
 
@@ -89,19 +86,15 @@ src/
 
 ## 🔐 Authentication
 
-Authentication is handled using JWT tokens.
-
-Protected routes require:
-
-Authorization: Bearer <token>
-
+```Authentication is handled using JWT tokens.
+Protected routes require: Authorization: Bearer <token>```
 
 ---
 
 ## ⚙️ Environment Variables
 
 Create a `.env` file in project root:
-
+```
 PORT=5000
 MONGO_URI=your_mongodb_uri
 JWT_SECRET=your_secret_key
@@ -112,20 +105,15 @@ CLOUDINARY_API_SECRET=xxx
 
 RAZORPAY_KEY_ID=xxx
 RAZORPAY_KEY_SECRET=xxx
-
+```
 
 ---
 
 ## 📘 API Documentation
-
-Swagger documentation is available at:
-
-/docs
-
-
-Example:
-http://localhost:5000/docs
-
+```
+Swagger documentation is available at: /docs
+Example: http://localhost:5000/docs
+```
 
 ---
 
