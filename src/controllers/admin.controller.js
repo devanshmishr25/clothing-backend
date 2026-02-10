@@ -64,7 +64,7 @@ export async function updateUserRole(req, res) {
 
   res.json(user);
 }
-
+ 
 export async function deactivateUser(req, res) {
   const user = await User.findByIdAndUpdate(
     req.params.id,
