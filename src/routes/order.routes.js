@@ -1,14 +1,8 @@
 import { Router } from "express";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { cancelOrder } from "../controllers/order.controller.js";
-
-import {
-  createCodOrderFromCart,
-  myOrders,
-  getMyOrderById,
-  allOrders,
-  updateOrderStatus
-} from "../controllers/order.controller.js";
+import { downloadInvoice } from "../controllers/order.controller.js";
+import { createCodOrderFromCart, myOrders, getMyOrderById, allOrders, updateOrderStatus} from "../controllers/order.controller.js";
 
 const router = Router();
 
@@ -17,9 +11,14 @@ router.post("/cod/from-cart", requireAuth, createCodOrderFromCart);
 router.get("/me", requireAuth, myOrders);
 router.get("/me/:id", requireAuth, getMyOrderById);
 router.put("/:id/cancel", requireAuth, cancelOrder);
+router.get("/:id/invoice", requireAuth, downloadInvoice);
 
 // ADMIN
 router.get("/", requireAuth, requireRole("admin"), allOrders);
 router.put("/:id/status", requireAuth, requireRole("admin"), updateOrderStatus);
 
+
+
 export default router;
+
+

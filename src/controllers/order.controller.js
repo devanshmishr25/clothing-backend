@@ -3,6 +3,9 @@ import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import Cart from "../models/Cart.js";
 
+// ------------INVOICE-------------
+import { generateInvoice } from "../utils/invoice.js";
+
 // ---------- VALIDATION ----------
 const shippingSchema = z.object({
   fullName: z.string().min(2),
@@ -190,4 +193,17 @@ export async function updateOrderStatus(req, res) {
   await order.save();
 
   res.json(order);
+}
+
+export async function downloadInvoice(req, res) {
+  const order = await Order.findOne({
+    _id: req.params.id,
+    user: req.user.id,
+  });
+
+  if (!order) {
+    return res.status(404).json({ message: "Order not found" });
+  }
+
+  generateInvoice(res, order);
 }

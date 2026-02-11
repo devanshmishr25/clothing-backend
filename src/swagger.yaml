@@ -304,8 +304,7 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                [fullName, phone, line1, city, state, pincode]
+              required: [fullName, phone, line1, city, state, pincode]
               properties:
                 fullName:
                   type: string
@@ -435,7 +434,12 @@ paths:
             schema:
               type: object
               required:
-                [razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId]
+                [
+                  razorpay_order_id,
+                  razorpay_payment_id,
+                  razorpay_signature,
+                  orderId,
+                ]
               properties:
                 razorpay_order_id:
                   type: string
@@ -452,7 +456,6 @@ paths:
       responses:
         "200":
           description: Payment verified successfully
-
 
   # ---------- CANCEL ORDER ----------
 
@@ -548,3 +551,31 @@ paths:
       responses:
         "200":
           description: Dashboard stats returned
+
+  # ---------------- INVOICE ----------------
+  /api/orders/{id}/invoice:
+    get:
+      summary: Download invoice PDF for an order
+      description: Returns invoice PDF file for the given order ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Order ID
+          schema:
+            type: string
+          example: 6971cd4cbaefbdd724feae90
+      responses:
+        "200":
+          description: Invoice PDF file
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Order not found
+        "401":
+          description: Unauthorized
