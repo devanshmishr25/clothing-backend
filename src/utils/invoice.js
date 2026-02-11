@@ -14,7 +14,7 @@ export function generateInvoice(res, order) {
   /* ---------- HEADER ---------- */
   doc
     .fontSize(20)
-    .text("Clothing Store Invoice", { align: "center" })
+    .text("Invoice", { align: "center" })
     .moveDown();
 
   doc.fontSize(12);
